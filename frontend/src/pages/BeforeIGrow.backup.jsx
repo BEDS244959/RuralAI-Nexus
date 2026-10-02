@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   AlertCircle,
   CheckCircle2,
@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 
 import LocationDetector from "../components/LocationDetector";
-import BeforePlantingJourney from "../components/BeforePlantingJourney";
 import ScenarioSimulator from "../components/ScenarioSimulator";
 import { cropData } from "../data/cropData";
 import { getWeather } from "../services/weatherService";
@@ -38,7 +37,6 @@ export default function BeforeIGrow() {
 
   const [selectedCrop, setSelectedCrop] = useState(null);
   const [analyzed, setAnalyzed] = useState(false);
-  const [pendingJourneyAction, setPendingJourneyAction] = useState(null);
 
   const [marketPrices, setMarketPrices] = useState({});
   const [marketLoading, setMarketLoading] = useState(false);
@@ -221,81 +219,6 @@ export default function BeforeIGrow() {
       );
     }, [recommendations]);
 
-  const scrollToJourneySection = (id) => {
-    requestAnimationFrame(() => {
-      document.getElementById(id)?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    });
-  };
-
-  const handleJourneyCropOptions = async () => {
-    if (!analyzed) {
-      setPendingJourneyAction("crop-options");
-      await analyzeFarm();
-      return;
-    }
-
-    scrollToJourneySection("crop-results");
-  };
-
-  const handleJourneyScenarios = async () => {
-    if (!analyzed) {
-      setPendingJourneyAction("scenarios");
-      await analyzeFarm();
-      return;
-    }
-
-    if (!selectedCrop && sortedRecommendations.length > 0) {
-      setPendingJourneyAction("scenarios");
-      setSelectedCrop(sortedRecommendations[0].name);
-      return;
-    }
-
-    scrollToJourneySection("scenarios");
-  };
-
-  useEffect(() => {
-    if (
-      pendingJourneyAction === "scenarios" &&
-      analyzed &&
-      sortedRecommendations.length > 0 &&
-      !selectedCrop
-    ) {
-      setSelectedCrop(sortedRecommendations[0].name);
-    }
-  }, [
-    pendingJourneyAction,
-    analyzed,
-    sortedRecommendations,
-    selectedCrop,
-  ]);
-
-  useEffect(() => {
-    if (pendingJourneyAction === "crop-options" && analyzed) {
-      requestAnimationFrame(() => {
-        document.getElementById("crop-results")?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-        setPendingJourneyAction(null);
-      });
-    }
-  }, [pendingJourneyAction, analyzed]);
-
-  useEffect(() => {
-    if (pendingJourneyAction === "scenarios" && selectedCrop) {
-      requestAnimationFrame(() => {
-        document.getElementById("scenarios")?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-        setPendingJourneyAction(null);
-      });
-    }
-  }, [pendingJourneyAction, selectedCrop]);
-
   return (
     <div className="min-h-screen bg-[#f4f7f4]">
 
@@ -346,13 +269,6 @@ export default function BeforeIGrow() {
 
       <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
 
-        {/* BEFORE PLANTING JOURNEY */}
-
-        <BeforePlantingJourney
-          onCropOptions={handleJourneyCropOptions}
-          onScenarios={handleJourneyScenarios}
-        />
-
         {/* LOCATION */}
 
         <section>
@@ -366,7 +282,7 @@ export default function BeforeIGrow() {
         {/* LOCATION SUMMARY */}
 
         {location && (
-          <section id="location" className="rounded-2xl border border-green-100 bg-white p-6 shadow-sm">
+          <section className="rounded-2xl border border-green-100 bg-white p-6 shadow-sm">
 
             <div className="flex items-start gap-4">
 
@@ -421,7 +337,7 @@ export default function BeforeIGrow() {
 
         {/* WEATHER */}
 
-        <section id="weather" className="rounded-2xl border border-blue-100 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl border border-blue-100 bg-white p-6 shadow-sm">
 
           <div className="flex items-center justify-between">
 
@@ -512,7 +428,7 @@ export default function BeforeIGrow() {
 
         {/* FARM INPUTS */}
 
-        <section id="farm-inputs" className="rounded-2xl border border-green-100 bg-white p-6 shadow-sm">
+        <section className="rounded-2xl border border-green-100 bg-white p-6 shadow-sm">
 
           <div className="flex items-center gap-3">
 
@@ -651,7 +567,7 @@ export default function BeforeIGrow() {
         {/* RESULTS */}
 
         {analyzed && (
-          <section id="crop-results">
+          <section>
 
             <div className="mb-5">
 
@@ -1420,7 +1336,7 @@ function CropResult({
       {/* DETAILS */}
 
       {isSelected && (
-        <div id="scenarios" className="border-t border-gray-100 p-6">
+        <div className="border-t border-gray-100 p-6">
 
           <div className="grid gap-6 lg:grid-cols-3">
 
